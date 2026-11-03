@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>朱新恩 · 会用 AI 讲故事的内容创作者</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap">
+<style>
+  :root {
+    --bg: #101010;
+    --surface: #171715;
+    --line: #26261f;
+    --text: #ece9df;
+    --muted: #8d8a80;
+    --accent: #ffd60a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+
+  /* ===== 导航栏 ===== */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px;
+    background: rgba(16,16,16,0.72);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .brand { font-weight: 900; font-size: 17px; letter-spacing: 0.02em; }
+  nav .links { display: flex; align-items: center; gap: 28px; }
+  nav .links a { color: var(--muted); text-decoration: none; font-size: 14px; transition: color .2s; }
+  nav .links a:hover { color: var(--text); }
+  nav .cta {
+    background: var(--accent); color: #111; font-weight: 700; font-size: 14px;
+    padding: 9px 18px; text-decoration: none;
+  }
+  nav .cta:hover { filter: brightness(1.08); color: #111; }
+
+  /* ===== Hero 全屏 ===== */
+  .hero { position: relative; min-height: 100vh; display: flex; align-items: center; overflow: hidden; }
+  .hero video.bg {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0.62;                 /* 背景视频亮度：调高，动态细节看得见 */
+    filter: brightness(1.15);      /* 再整体提亮一档 */
+  }
+  .hero::after {
+    content: ""; position: absolute; inset: 0;
+    /* 压暗层放轻：保证文字清晰，但不过分遮掉动画 */
+    background: linear-gradient(180deg, rgba(16,16,16,.30) 0%, rgba(16,16,16,.50) 55%, var(--bg) 100%);
+  }
+  .hero-inner { position: relative; z-index: 2; width: 100%; }
+  .hero .eyebrow {
+    display: inline-block; background: var(--accent); color: #111;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.1em; padding: 5px 12px; margin-bottom: 28px;
+  }
+  .hero h1 {
+    font-size: clamp(48px, 7vw, 92px); font-weight: 900; line-height: 1.06; letter-spacing: -0.02em;
+    max-width: 900px;
+  }
+  .hero h1 .hl { color: var(--accent); }
+  .hero .sub { margin-top: 26px; font-size: 19px; color: var(--muted); max-width: 560px; }
+  .hero .actions { margin-top: 44px; display: flex; gap: 14px; }
+  .btn {
+    display: inline-block; font-size: 15px; font-weight: 700; padding: 13px 28px; text-decoration: none;
+  }
+  .btn-solid { background: var(--accent); color: #111; }
+  .btn-ghost { border: 1px solid var(--line); color: var(--text); }
+  .btn-ghost:hover { border-color: var(--muted); }
+
+  /* ===== 通用章节 ===== */
+  section { padding: 110px 0; border-top: 1px solid var(--line); }
+  .tag {
+    display: inline-block; background: var(--accent); color: #111;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.1em; padding: 4px 10px; margin-bottom: 20px;
+  }
+  h2 { font-size: clamp(30px, 4.5vw, 48px); font-weight: 900; line-height: 1.15; margin-bottom: 18px; }
+  .lead { color: var(--muted); font-size: 16px; max-width: 640px; }
+
+  /* ===== 关于 / 个人经历 ===== */
+  .about-grid { display: grid; grid-template-columns: 220px 1fr; gap: 44px; align-items: start; }
+  .about-photo img { width: 100%; border: 1px solid var(--line); display: block; }
+  .about-photo .cap { color: var(--muted); font-size: 12px; margin-top: 10px; line-height: 1.5; }
+  .timeline { margin-top: 32px; border-left: 2px solid var(--line); }
+  .titem { padding: 0 0 24px 24px; position: relative; }
+  .titem::before { content: ""; position: absolute; left: -7px; top: 8px; width: 12px; height: 12px; background: var(--accent); }
+  .titem h4 { font-size: 16px; font-weight: 700; }
+  .titem p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 36px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); padding: 20px; }
+  .stat b { display: block; font-size: 30px; font-weight: 900; color: var(--accent); }
+  .stat span { font-size: 12px; color: var(--muted); }
+  .mini-contact { margin-top: 28px; color: var(--muted); font-size: 14px; }
+  .mini-contact b { color: var(--text); }
+
+  /* ===== 作品 ===== */
+  .work-block { margin-top: 64px; }
+  .work-block h3 { font-size: 22px; font-weight: 900; margin-bottom: 8px; }
+  .work-block .desc { color: var(--muted); font-size: 15px; max-width: 640px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .chip { border: 1px solid var(--line); color: var(--text); font-size: 13px; padding: 5px 12px; }
+  .video-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 28px; }
+  .vcard video { width: 100%; aspect-ratio: 9/16; background: #000; display: block; border: 1px solid var(--line); }
+  .vcard figcaption { margin-top: 8px; font-size: 13px; color: var(--muted); }
+  .video-grid.three { grid-template-columns: repeat(3, 1fr); }
+  .video-grid.gallery { grid-template-columns: repeat(2, 1fr); }
+  .video-grid.gallery video { aspect-ratio: 4/3; }
+  .video-grid.quart { grid-template-columns: repeat(2, 1fr); }
+  .video-grid.quart video { aspect-ratio: 4/3; }
+
+  .acc-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 28px; }
+  .acc { background: var(--surface); border: 1px solid var(--line); padding: 16px; }
+  .acc .name { font-weight: 700; font-size: 13px; margin-bottom: 10px; line-height: 1.4; }
+  .acc .num { font-size: 22px; font-weight: 900; color: var(--accent); }
+  .acc .lab { font-size: 11px; color: var(--muted); }
+
+  .shot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 28px; }
+  .shot-grid figure img { width: 100%; border: 1px solid var(--line); display: block; }
+  .shot-grid figcaption { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  /* ================================================
+     悬浮缩放效果（hover zoom）
+     原理：
+     1. 整个卡片（图+框+图注）一起 transform: scale(1.1) 放大
+     2. transform-origin: center，以卡片中心缩放，位置不变
+     3. hover 时 z-index 拉高，放大的卡片直接覆盖旁边的卡片
+     4. 加 drop-shadow，浮起感更明显
+     注意：Hero 背景视频（video.bg）不参与缩放
+     ================================================ */
+  .shot-grid figure, .vcard, .ph {
+    position: relative;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    transform-origin: center center;
+  }
+  .shot-grid figure:hover,
+  .vcard:hover,
+  .about-photo:hover .ph {
+    transform: scale(1.12);             /* 整张卡片放大，边缘压住相邻卡片 */
+    z-index: 20;                        /* 压在上面 */
+    /* 整体边框外圈：淡黄色光晕 */
+    box-shadow:
+      0 0 0 1px rgba(255, 214, 10, 0.35),
+      0 0 26px rgba(255, 214, 10, 0.28),
+      0 18px 50px rgba(0, 0, 0, 0.65);
+  }
+  /* 图注：悬浮小标签，不随布局占位 */
+  .shot-grid figcaption, .vcard figcaption {
+    position: absolute; left: 8px; bottom: 8px;
+    background: rgba(16, 16, 16, 0.78); color: var(--text);
+    font-size: 11px; padding: 3px 8px; backdrop-filter: blur(4px);
+  }
+  /* 可点击的媒体：鼠标变成放大镜 */
+  .shot-grid img, .vcard video, .ph img { cursor: zoom-in; }
+
+  /* 移动光点已移除，保留 hover 时外圈淡黄色光晕 */
+
+  /* ===== 全局微动效：更灵动 ===== */
+  .btn { transition: transform .25s ease, box-shadow .25s ease; }
+  .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(255,214,10,.25); }
+  nav .links a { transition: color .2s ease; }
+  nav .links a:hover { color: var(--accent); }
+  /* 首屏入场：标题、标签依次浮上来 */
+  .hero h1, .hero .eyebrow, .hero .sub, .hero .actions { animation: hero-in 1s ease both; }
+  .hero .eyebrow { animation-delay: .1s; }
+  .hero .sub { animation-delay: .25s; }
+  .hero .actions { animation-delay: .4s; }
+  @keyframes hero-in { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+  /* 减少动态偏好：关掉动效 */
+  @media (prefers-reduced-motion: reduce) {
+    .shot-grid figure::before, .vcard::before, .ph::before { animation: none; }
+    .hero h1, .hero .eyebrow, .hero .sub, .hero .actions { animation: none; }
+  }
+
+  /* ================================================
+     灯箱（lightbox）
+     点击缩略图 → 全屏深色背景弹出大图/大视频
+     关闭方式：点右上角 ×、点黑色背景、按 Esc
+     ================================================ */
+  .lightbox {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0, 0, 0, 0.92);          /* 深色遮罩 */
+    display: none;                             /* 默认隐藏 */
+    align-items: center; justify-content: center;
+    padding: 48px;
+  }
+  .lightbox.open { display: flex; }            /* JS 加 open 类后显示 */
+  .lightbox img, .lightbox video {
+    max-width: 90vw; max-height: 85vh;        /* 大图限制在屏幕内 */
+    display: block; box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  }
+  .lb-close {
+    position: fixed; top: 18px; right: 26px;
+    background: none; border: none; color: #fff;
+    font-size: 42px; line-height: 1; cursor: pointer;
+  }
+  .lb-close:hover { color: var(--accent); }
+
+  /* ===== 优势 ===== */
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); margin-top: 32px; }
+  .step { padding: 22px 18px; border-right: 1px solid var(--line); position: relative; }
+  .step:last-child { border-right: none; }
+  .step .no { color: var(--muted); font-weight: 900; font-size: 12px; }
+  .step h4 { font-size: 16px; font-weight: 700; margin: 8px 0 6px; }
+  .step p { font-size: 13px; color: var(--muted); }
+  .step::after { content: "→"; position: absolute; right: -11px; top: 50%; transform: translateY(-50%); color: var(--accent); font-weight: 900; background: var(--bg); padding: 0 4px; z-index: 1; }
+  .step:last-child::after { content: ""; }
+  .notes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 28px; }
+  .note { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--accent); padding: 22px; }
+  .note .q { font-size: 13px; font-weight: 900; margin-bottom: 10px; }
+  .note p { font-size: 14px; color: var(--text); }
+
+  /* ===== 联系整屏收尾 ===== */
+  .contact { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  .contact h2 { font-size: clamp(44px, 7vw, 88px); }
+  .contact .ways { margin-top: 48px; display: flex; flex-direction: column; gap: 20px; }
+  .contact .way { display: flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 700; }
+  .contact .way svg { width: 26px; height: 26px; color: var(--accent); }
+  .contact .way span.lab { color: var(--muted); font-size: 14px; font-weight: 400; }
+  .foot { margin-top: 80px; color: var(--muted); font-size: 13px; }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+
+  @media (max-width: 900px) {
+    .about-grid { grid-template-columns: 1fr; }
+    .video-grid, .video-grid.three, .video-grid.gallery { grid-template-columns: repeat(2, 1fr); }
+    .acc-grid { grid-template-columns: repeat(2, 1fr); }
+    .flow, .notes { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 640px) {
+    nav .links a:not(.cta) { display: none; }
+    .shot-grid { grid-template-columns: repeat(2, 1fr); }
+    .flow, .notes { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 导航 ===== -->
+<nav>
+  <div class="brand">朱新恩</div>
+  <div class="links">
+    <a href="#about">关于</a>
+    <a href="#works">作品</a>
+    <a href="#strength">优势</a>
+    <a href="#contact" class="cta">联系我</a>
+  </div>
+</nav>
+
+<!-- ===== HERO 全屏 ===== -->
+<header class="hero">
+  <!-- Hero 动态背景：webm 优先（体积小），mp4 兜底；poster 是视频加载前/不支持时的静态封面 -->
+  <video class="bg" autoplay muted loop playsinline
+         poster="media/img/hero-poster.jpg">
+    <source src="media/video/hero-bg.webm" type="video/webm">
+    <source src="media/video/hero-bg.mp4" type="video/mp4">
+  </video>
+  <div class="hero-inner wrap">
+    <div class="eyebrow">短视频运营 / 账号运营 · 杭州 · 求职中</div>
+    <h1>会用 AI 讲故事的<br><span class="hl">内容创作者</span></h1>
+    <p class="sub">新闻采编出身。正式短剧上线红果，一个人扛过门店 5 账号矩阵的日更内容。</p>
+    <div class="actions">
+      <a class="btn btn-solid" href="#works">看作品</a>
+      <a class="btn btn-ghost" href="#contact">联系我</a>
+    </div>
+  </div>
+</header>
+
+<!-- ===== 关于 / 个人经历 ===== -->
+<section id="about" class="wrap reveal">
+  <span class="tag">ABOUT · 个人经历</span>
+  <h2>从传统媒体课堂，<br>主动跑进 AI 内容一线</h2>
+  <div class="about-grid">
+    <div class="about-photo">
+      <div class="ph"><img src="media/img/portrait.png" alt="朱新恩正装照"></div>
+      <div class="cap">朱新恩 · 江西传媒职业学院 · 新闻采编与制作</div>
+    </div>
+    <div>
+      <p class="lead">一个人跑通过一条 AI 短剧生产线，也一个人扛过门店 5 账号矩阵的日更。不躺平在夕阳专业里等分配，用作品说话。</p>
+      <div class="timeline">
+        <div class="titem"><h4>在校专业训练</h4><p>练摄像机、PR、PS，拍剪作业不断线。</p></div>
+        <div class="titem"><h4>AIGC 三方夏令营</h4><p>判断传统媒体风向，主动抓 AI 风口，跑通从脚本到成片的生产线。</p></div>
+        <div class="titem"><h4>众匠实习</h4><p>因踏实被负责人单独选中加训，外派跟师一周。</p></div>
+        <div class="titem"><h4>汽修矩阵实战</h4><p>一个人扛下 5 账号日更内容，第一次明白工作和学校不一样。</p></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>4 集</b><span>红果上线短剧</span></div>
+        <div class="stat"><b>5 个</b><span>服务过的商业账号</span></div>
+        <div class="stat"><b>4 条/天</b><span>日更产出节奏</span></div>
+      </div>
+      <div class="mini-contact">坐标杭州 · 找短视频运营 / 账号运营岗 · <b>微信 zxe041666 · 13687093019</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 作品 ===== -->
+<section id="works" class="wrap reveal">
+  <span class="tag">WORKS · 作品</span>
+  <h2>作品</h2>
+
+  <!-- 01 红果短剧 -->
+  <div class="work-block">
+    <h3>01 · 《兽世求生，不，我是来当女王的》<span style="color:var(--accent)"> — 红果短剧上线作品</span></h3>
+    <p class="desc">学校 + 政府 + 企业三方合作 AIGC 项目。我负责第 13 / 14 / 15 / 58 集：脚本提示词优化 → 豆包生成 → 剪辑成片。</p>
+    <div class="chips">
+      <span class="chip">提示词优化</span><span class="chip">AI 视频生成</span><span class="chip">剪辑成片</span>
+    </div>
+    <div class="video-grid quart">
+      <figure class="vcard"><video controls preload="metadata" poster="media/img/poster-ep13.jpg" src="media/video/ep13.mp4"></video><figcaption>第 13 集</figcaption></figure>
+      <figure class="vcard"><video controls preload="metadata" poster="media/img/poster-ep14.jpg" src="media/video/ep14.mp4"></video><figcaption>第 14 集</figcaption></figure>
+      <figure class="vcard"><video controls preload="metadata" poster="media/img/poster-ep15.jpg" src="media/video/ep15.mp4"></video><figcaption>第 15 集</figcaption></figure>
+      <figure class="vcard"><video controls preload="metadata" poster="media/img/poster-ep58.jpg" src="media/video/ep58.mp4"></video><figcaption>第 58 集</figcaption></figure>
+    </div>
+  </div>
+
+  <!-- 02 汽修矩阵 -->
+  <div class="work-block">
+    <h3>02 · 苏州中信轿车维修 · 5 账号矩阵<span style="color:var(--accent)"> — 真实商业项目</span></h3>
+    <p class="desc">33 年老店（5000㎡、60 人团队、老板「三哥」IP）。我被外派独立负责内容：车间实拍约 1 小时、回去逐条剪，一天产出 4 条，双平台日更，统一黄标签 + 大标题封面体系。</p>
+    <div class="acc-grid">
+      <div class="acc"><div class="name">姑苏中信汽修（德系专修）</div><div class="num">848</div><div class="lab">抖音粉 / 273 作品</div></div>
+      <div class="acc"><div class="name">苏州中信钣金喷漆</div><div class="num">375</div><div class="lab">抖音粉 / 148 作品</div></div>
+      <div class="acc"><div class="name">苏州中信新能源专修</div><div class="num">295</div><div class="lab">抖音粉 / 131 作品</div></div>
+      <div class="acc"><div class="name">视频号「中信轿车」</div><div class="num">402</div><div class="lab">条原创</div></div>
+      <div class="acc"><div class="name">视频号「中信汽修1」</div><div class="num">129</div><div class="lab">条原创</div></div>
+    </div>
+
+    <div class="shot-grid">
+      <figure><img src="media/img/acc-gusu.jpg" alt="姑苏中信汽修账号主页"><figcaption>姑苏中信汽修 · 主页</figcaption></figure>
+      <figure><img src="media/img/wall1.jpg" alt="姑苏中信汽修作品墙"><figcaption>姑苏中信汽修 · 作品</figcaption></figure>
+      <figure><img src="media/img/acc-banjin.jpg" alt="钣金喷漆账号主页"><figcaption>钣金喷漆 · 主页</figcaption></figure>
+      <figure><img src="media/img/wall2.jpg" alt="钣金喷漆作品墙"><figcaption>钣金喷漆 · 作品</figcaption></figure>
+      <figure><img src="media/img/acc-xinenergy.jpg" alt="新能源账号主页"><figcaption>新能源专修 · 主页</figcaption></figure>
+      <figure><img src="media/img/wall3.jpg" alt="新能源作品墙"><figcaption>新能源专修 · 作品</figcaption></figure>
+      <figure><img src="media/img/acc-cn1.jpg" alt="视频号中信轿车主页"><figcaption>视频号中信轿车 · 主页</figcaption></figure>
+      <figure><img src="media/img/wall4.jpg" alt="中信轿车作品墙"><figcaption>视频号中信轿车 · 作品</figcaption></figure>
+    </div>
+
+    <p class="desc" style="margin-top:36px">账号成片（实拍 + 剪辑 + 封面包装）：</p>
+    <div class="video-grid three">
+      <figure class="vcard"><video controls preload="metadata" src="media/video/case1.mp4"></video><figcaption>账号成片 · 修车案例</figcaption></figure>
+      <figure class="vcard"><video controls preload="metadata" src="media/video/case2.mp4"></video><figcaption>账号成片 · 老板口播</figcaption></figure>
+      <figure class="vcard"><video controls preload="metadata" src="media/video/case3.mp4"></video><figcaption>账号成片 · 车间实拍</figcaption></figure>
+    </div>
+  </div>
+
+  <!-- 03 剪辑作品 -->
+  <div class="work-block">
+    <h3>03 · 剪辑作品<span style="color:var(--accent)"> — 持续更新</span></h3>
+    <p class="desc">课设作业、个人 vlog、其他成片。后续新作品持续补充在这里。</p>
+    <div class="video-grid gallery">
+      <figure class="vcard"><video controls preload="metadata" src="media/video/course.mp4"></video><figcaption>在校课设作业</figcaption></figure>
+      <figure class="vcard"><video controls preload="metadata" src="media/video/demo.mp4"></video><figcaption>其他成片</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 优势 ===== -->
+<section id="strength" class="wrap reveal">
+  <span class="tag">STRENGTH · 我的优势</span>
+  <h2>一条 AI 短剧，<br>我一个人跑完整条线</h2>
+  <div class="flow">
+    <div class="step"><div class="no">STEP 1</div><h4>脚本</h4><p>通读大纲与世界观，确认每集节奏</p></div>
+    <div class="step"><div class="no">STEP 2</div><h4>提示词优化</h4><p>脚本拆成画面提示词，调优指令</p></div>
+    <div class="step"><div class="no">STEP 3</div><h4>豆包生成</h4><p>批量生成画面，筛选可用镜头</p></div>
+    <div class="step"><div class="no">STEP 4</div><h4>剪辑成片</h4><p>节奏、音效、字幕，输出成片</p></div>
+  </div>
+  <div class="notes">
+    <div class="note"><div class="q">关于留人</div><p>游戏直播号做到 500 粉卡住——内容没记忆点，观众滑进即走。重做一次，我先改主播的沟通方式：人留不住，切片再剪也没用。</p></div>
+    <div class="note"><div class="q">关于矩阵</div><p>5 个账号要一眼被认出来：统一黄标签 + 大标题封面体系。单条爆款是运气，统一感才是资产。</p></div>
+    <div class="note"><div class="q">关于 AI 短剧</div><p>成片质量的分水岭不在生成，在提示词优化——脚本拆得越准，废片越少。</p></div>
+  </div>
+</section>
+
+<!-- ===== 联系整屏收尾 ===== -->
+<section id="contact" class="contact wrap reveal">
+  <span class="tag">CONTACT</span>
+  <h2>带作品面试，<br>随时<span style="color:var(--accent)">可聊</span>。</h2>
+  <p class="lead">坐标杭州，找短视频运营 / 账号运营岗。</p>
+  <div class="ways">
+    <div class="way">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 4C5.36 4 2 6.9 2 10.5c0 2.05 1.14 3.87 2.9 5.03L4.2 17.5l2.4-1.2c.9.25 1.9.4 2.9.4.2 0 .4 0 .6-.02a5.6 5.6 0 0 1-.2-1.48c0-3.3 3.13-6 7-6 .25 0 .5 0 .74.03C16.05 5.9 13.06 4 9.5 4zM7 8.5a.9.9 0 1 1 0 1.8.9.9 0 0 1 0-1.8zm5 0a.9.9 0 1 1 0 1.8.9.9 0 0 1 0-1.8zm4.5 2.75c-3.3 0-6 2.3-6 5.15 0 2.85 2.7 5.15 6 5.15.7 0 1.4-.1 2-.3l1.9 1-.55-1.75A4.9 4.9 0 0 0 21.5 16.4c.62-.96 1-2.05 1-3.1 0-2.85-2.7-5.05-6-5.05zm-2 2.35a.8.8 0 1 1 0 1.6.8.8 0 0 1 0-1.6zm4 0a.8.8 0 1 1 0 1.6.8.8 0 0 1 0-1.6z"/></svg>
+      <div><div>微信：zxe041666</div><span class="lab">扫码或搜索添加，备注求职</span></div>
+    </div>
+    <div class="way">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24 11.4 11.4 0 0 0 3.6.58 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.58 3.57a1 1 0 0 1-.25 1.02l-2.23 2.21z"/></svg>
+      <div><div>电话：13687093019</div><span class="lab">工作日 9:00 - 21:00</span></div>
+    </div>
+  </div>
+  <div class="foot">© 2026 朱新恩 · 内容运营作品集 · 杭州</div>
+</section>
+
+<!-- 灯箱容器：JS 动态往里塞大图或大视频 -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" aria-label="关闭">×</button>
+</div>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  /* ===== 灯箱逻辑 ===== */
+  const lightbox = document.getElementById('lightbox');
+
+  // 打开灯箱：根据媒体类型塞入 <img> 或 <video>
+  function openLightbox(src, isVideo) {
+    lightbox.innerHTML = '<button class="lb-close" aria-label="关闭">×</button>' + (
+      isVideo
+        ? '<video src="' + src + '" controls autoplay></video>'
+        : '<img src="' + src + '">'
+    );
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';   // 弹窗时禁止背景滚动
+    lightbox.querySelector('.lb-close').addEventListener('click', closeLightbox);
+  }
+  // 关闭灯箱
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    lightbox.querySelector('video')?.pause();   // 关的时候停掉视频
+    document.body.style.overflow = '';
+  }
+  // 点击黑色遮罩空白处 = 关闭
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+  // 按 Esc 关闭
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+  // 给所有可点击的图片/视频绑定打开灯箱
+  document.querySelectorAll('.shot-grid img, .vcard video, .ph img').forEach(el => {
+    el.addEventListener('click', () => {
+      openLightbox(el.currentSrc || el.src, el.tagName === 'VIDEO');
+    });
+  });
+
+  /* ===== 视频互斥播放 =====
+     任何一个视频开始播放时，暂停页面上其他所有视频（含灯箱里新弹出的）
+     这样不会出现两三个视频同时出声。用捕获阶段监听，灯箱动态生成的视频也管得到。 */
+  document.addEventListener('play', (e) => {
+    if (e.target.tagName !== 'VIDEO') return;
+    document.querySelectorAll('video').forEach(v => {
+      if (v !== e.target) v.pause();
+    });
+  }, true);
+</script>
+
+</body>
+</html>
